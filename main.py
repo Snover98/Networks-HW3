@@ -65,7 +65,7 @@ def main():
 
         broadcasts = [np.random.poisson(v) for v in V]
 
-
+        event_queues = [np.zeros(broadcasts_num, dtype=np.bool_) for broadcasts_num in broadcasts]
 
         # print(occurances)
         # print(broadcasts)
@@ -75,34 +75,51 @@ def main():
             for idx, packets in enumerate(occurances):
                 for _ in range(packets):
                     out_port = np.random.choice(range(M), p=P[idx])
-                    queues[out_port].append(cur_time)
+                    event_queues[out_port] = np.append(event_queues[out_port], [True])
+
+
+        for out_port in range(M):
+            # print(event_queues[out_port])
+            np.random.shuffle(event_queues[out_port])
+            for event_is_arrival in event_queues[out_port]:
+                # if the event is an arrival, try to put it in the port's queue
+                if event_is_arrival:
+                    if len(queues[out_port]) < Q[out_port]:
+                        queues[out_port].append(cur_time)
+                    else:
+                        X[out_port] += 1
+                # otherwise, try and broadcast a packet from the port
+                else:
+                    if not len(queues[out_port]) == 0:
+                        # broadcast first pack in queue and add to total time
+                        broadcasted_pack = queues[out_port].popleft()
+                        total_service_time += cur_time - broadcasted_pack
+                        # print("BROADCASTED PACK AT TIME {t}".format(t=cur_time))
+                        Y[out_port] += 1
+
+                    if not len(queues[out_port]) == 0:
+                        # update total time for pack that is now getting service
+                        service_package = queues[out_port].popleft()
+                        total_wait_time += cur_time - service_package
+                        queues[out_port].appendleft(service_package)
+
+
 
         # for port in range(M):
         #     print(len(queues[port]))
         #     print(queues[port])
 
-        for port, num_broadcasted in enumerate(broadcasts):
-            # print(num_broadcasted)
-            # print(len())
-            for _ in range(num_broadcasted):
-                if not len(queues[port]) == 0:
-                    # broadcast first pack in queue and add to total time
-                    broadcasted_pack = queues[port].popleft()
-                    total_service_time += cur_time - broadcasted_pack
-                    # print("BROADCASTED PACK AT TIME {t}".format(t=cur_time))
-                    Y[port] += 1
-
-                if not len(queues[port]) == 0:
-                    # update total time for pack that is now getting service
-                    service_package = queues[port].popleft()
-                    total_wait_time += cur_time - service_package
-                    queues[port].appendleft(service_package)
-
-            while len(queues[port]) > Q[port]:
-                queues[port].pop()
-                X[port] += 1
-
-            assert (len(queues[port]) <= Q[port])
+        # for port, num_broadcasted in enumerate(broadcasts):
+        #     # print(num_broadcasted)
+        #     # print(len())
+        #     for _ in range(num_broadcasted):
+        #
+        #
+        #     while len(queues[port]) > Q[port]:
+        #         queues[port].pop()
+        #         X[port] += 1
+        #
+        #     assert (len(queues[port]) <= Q[port])
 
         # for port in range(M):
             # print(queues[port])
