@@ -44,6 +44,7 @@ def parse_input(inp):
     # return the values
     return T, N, M, P, L, Q, V
 
+
 def main():
     # parse input
     T, N, M, P, L, Q, V = parse_input(sys.argv[1:])
@@ -71,12 +72,11 @@ def main():
         # print(broadcasts)
 
         # incoming packets
-        if(cur_time < T):
+        if cur_time < T:
             for idx, packets in enumerate(occurances):
                 for _ in range(packets):
                     out_port = np.random.choice(range(M), p=P[idx])
                     event_queues[out_port] = np.append(event_queues[out_port], [True])
-
 
         for out_port in range(M):
             # print(event_queues[out_port])
@@ -103,29 +103,6 @@ def main():
                         total_wait_time += cur_time - service_package
                         queues[out_port].appendleft(service_package)
 
-
-
-        # for port in range(M):
-        #     print(len(queues[port]))
-        #     print(queues[port])
-
-        # for port, num_broadcasted in enumerate(broadcasts):
-        #     # print(num_broadcasted)
-        #     # print(len())
-        #     for _ in range(num_broadcasted):
-        #
-        #
-        #     while len(queues[port]) > Q[port]:
-        #         queues[port].pop()
-        #         X[port] += 1
-        #
-        #     assert (len(queues[port]) <= Q[port])
-
-        # for port in range(M):
-            # print(queues[port])
-            # assert(len(queues[port]) <= Q[port])
-
-        # print(queues)
         cur_time += 1
 
     # print(total_wait_time, total_service_time)
