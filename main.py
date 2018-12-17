@@ -101,7 +101,7 @@ def main():
                         # update total time for pack that is now getting service
                         service_package = queues[out_port].popleft()
                         total_wait_time += cur_time - service_package
-                        queues[out_port].appendleft(service_package)
+                        queues[out_port].appendleft(cur_time)
 
         cur_time += 1
 
