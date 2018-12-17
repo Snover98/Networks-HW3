@@ -52,8 +52,8 @@ def main():
     # broadcast queues for ports
     queues = [deque() for _ in Q]
 
-    Y = np.zeros(shape=M)
-    X = np.zeros(shape=M)
+    Y = np.zeros(shape=M, dtype=np.int32)
+    X = np.zeros(shape=M, dtype=np.int32)
 
     total_wait_time = 0.0
     total_service_time = 0.0
