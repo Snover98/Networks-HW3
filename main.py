@@ -58,9 +58,10 @@ def main():
     total_wait_time = 0.0
     total_service_time = 0.0
 
-    cur_time = 0
+    cur_time = 1
+    final_time = 0
 
-    while cur_time < T or sum([len(q) for q in queues]) > 0:
+    while cur_time <= T or sum([len(q) for q in queues]) > 0:
         # print("TIME IS {t}".format(t=cur_time))
         occurances = [np.random.poisson(l) for l in L]
 
@@ -74,6 +75,7 @@ def main():
         # incoming packets
         if cur_time < T:
             for idx, packets in enumerate(occurances):
+                final_time = cur_time
                 for _ in range(packets):
                     out_port = np.random.choice(range(M), p=P[idx])
                     event_queues[out_port] = np.append(event_queues[out_port], [True])
@@ -82,6 +84,7 @@ def main():
             # print(event_queues[out_port])
             np.random.shuffle(event_queues[out_port])
             for event_is_arrival in event_queues[out_port]:
+                final_time = cur_time
                 # if the event is an arrival, try to put it in the port's queue
                 if event_is_arrival:
                     if len(queues[out_port]) < Q[out_port]:
@@ -116,7 +119,7 @@ def main():
         str_Y += str(Y[i]) + " "
         str_X += str(X[i]) + " "
 
-    print(str_Y + str_X + "{tot_T} {T_w} {T_s}".format(tot_T=cur_time, T_w=T_w, T_s=T_s))
+    print(str_Y + str_X + "{tot_T} {T_w} {T_s}".format(tot_T=final_time, T_w=T_w, T_s=T_s))
 
 
 if __name__ == '__main__':
