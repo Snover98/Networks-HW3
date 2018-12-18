@@ -59,7 +59,10 @@ def main():
     total_service_time = 0.0
 
     cur_time = 1
-    final_time = 0
+    final_time = 0.0
+
+    occ_times = np.zeros(shape=N, dtype=np.float32)
+    broad_times = np.zeros(shape=M, dtype=np.float32)
 
     while cur_time <= T or sum([len(q) for q in queues]) > 0:
         # print("TIME IS {t}".format(t=cur_time))
@@ -69,14 +72,18 @@ def main():
 
         event_queues = [np.zeros(broadcasts_num, dtype=np.bool_) for broadcasts_num in broadcasts]
 
+        occ_times = np.zeros(shape=N, dtype=np.float32)
+        broad_times = np.zeros(shape=M, dtype=np.float32)
+
         # print(occurances)
         # print(broadcasts)
 
         # incoming packets
         if cur_time <= T:
             for idx, packets in enumerate(occurances):
-                final_time = cur_time
+                final_time = float(cur_time)
                 for _ in range(packets):
+                    occ_times[idx] += np.random.exponential(1.0/L[idx])
                     out_port = np.random.choice(range(M), p=P[idx])
                     event_queues[out_port] = np.append(event_queues[out_port], [True])
 
@@ -84,7 +91,7 @@ def main():
             # print(event_queues[out_port])
             np.random.shuffle(event_queues[out_port])
             for event_is_arrival in event_queues[out_port]:
-                final_time = cur_time
+                final_time = float(cur_time)
                 # if the event is an arrival, try to put it in the port's queue
                 if event_is_arrival:
                     if len(queues[out_port]) < Q[out_port]:
@@ -94,6 +101,7 @@ def main():
                 # otherwise, try and broadcast a packet from the port
                 else:
                     if not len(queues[out_port]) == 0:
+                        broad_times[out_port] += np.random.exponential(1.0/V[out_port])
                         # broadcast first pack in queue and add to total time
                         broadcasted_pack = queues[out_port].popleft()
                         total_service_time += cur_time - broadcasted_pack
@@ -109,6 +117,7 @@ def main():
         cur_time += 1
 
     # print(total_wait_time, total_service_time)
+    final_time += min(max(max(occ_times), max(broad_times)), 1) - 1
 
     T_w = total_wait_time / float(sum(Y))
     T_s = total_service_time / float(sum(Y))
