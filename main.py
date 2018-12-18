@@ -73,7 +73,7 @@ def main():
         # print(broadcasts)
 
         # incoming packets
-        if cur_time < T:
+        if cur_time <= T:
             for idx, packets in enumerate(occurances):
                 final_time = cur_time
                 for _ in range(packets):
